@@ -1,0 +1,21 @@
+    base:
+    docker run -p 2181:2181 zookeeper
+
+    base:
+    docker run -p 9092:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=192.168.0.104:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.104:9092 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    confluentinc/cp-kafka
+
+
+    base:
+     node consumer.js group1
+     node consumer.js group2
+
+    base:
+     node producer.js
+
+    base: 
+      tony south
+      tony north

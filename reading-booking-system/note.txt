@@ -1,0 +1,32 @@
+    base:
+    docker run -p 2181:2181 zookeeper
+
+    base:
+    docker run -p 9092:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=192.168.0.104:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.104:9092 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    confluentinc/cp-kafka
+
+
+Setup topics:
+    bash:
+    node reading-booking-system/topics.js
+
+Start Dispatcher:
+
+  bash:
+  node reading-booking-system/consumer/dispatcher.js
+
+
+Run Producer:
+
+  bash:
+  node reading-booking-system/producer.js
+
+
+Example input:
+
+  nginx:
+  ajay Mumbai
+  neha Delhi

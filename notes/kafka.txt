@@ -1,0 +1,147 @@
+
+🐘 Step 1: Start ZooKeeper
+    ZooKeeper is essential for managing the Kafka cluster. Run the following command to start a ZooKeeper container:
+
+    bash:
+    docker run -p 2181:2181 zookeeper
+
+
+📦 Step 2: Start Kafka
+    Once ZooKeeper is running, start the Kafka broker container. Replace <YOUR_HOST_IP> with your machine's IP address:
+    Medium
+
+    bash:
+    docker run -p 9092:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=<YOUR_HOST_IP>:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<YOUR_HOST_IP>:9092 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    confluentinc/cp-kafka
+
+
+
+🧩 Step 3: Configure Kafka Client (client.js)
+    Create a client.js file to configure the Kafka client:
+    
+    javascript:
+    const { Kafka } = require("kafkajs");
+
+    exports.kafka = new Kafka({
+    clientId: "my-app",
+    brokers: ["<YOUR_HOST_IP>:9092"],
+    });
+
+
+
+🛠️ Step 4: Create Kafka Topic (admin.js)
+    Use the Kafka Admin client to create a topic named rider-updates:
+
+    javascript:
+    const { kafka } = require("./client");
+
+    async function init() {
+    const admin = kafka.admin();
+    await admin.connect();
+    await admin.createTopics({
+        topics: [
+        {
+            topic: "rider-updates",
+            numPartitions: 2,
+        },
+        ],
+    });
+    await admin.disconnect();
+    }
+
+    init();
+
+
+
+
+✉️ Step 5: Implement Kafka Producer (producer.js)
+    Set up a producer to send messages to the rider-updates topic:
+
+    javascript:
+    const { kafka } = require("./client");
+    const readline = require("readline");
+
+    const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    });
+
+    async function init() {
+    const producer = kafka.producer();
+    await producer.connect();
+
+    rl.setPrompt("> ");
+    rl.prompt();
+
+    rl.on("line", async function (line) {
+        const [riderName, location] = line.split(" ");
+        await producer.send({
+        topic: "rider-updates",
+        messages: [
+            {
+            partition: location.toLowerCase() === "north" ? 0 : 1,
+            key: "location-update",
+            value: JSON.stringify({ name: riderName, location }),
+            },
+        ],
+        });
+    }).on("close", async () => {
+        await producer.disconnect();
+    });
+    }
+
+    init();
+
+
+
+
+📥 Step 6: Implement Kafka Consumer (consumer.js)
+    Create a consumer to read messages from the rider-updates topic:
+
+    javascript:
+    const { kafka } = require("./client");
+    const group = process.argv[2];
+
+    async function init() {
+    const consumer = kafka.consumer({ groupId: group });
+    await consumer.connect();
+
+    await consumer.subscribe({ topics: ["rider-updates"], fromBeginning: true });
+
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+        console.log(
+            `${group}: [${topic}]: PART:${partition}:`,
+            message.value.toString()
+        );
+        },
+    });
+    }
+
+    init();
+
+
+
+🚀 Running the Application
+    Start ZooKeeper and Kafka using the Docker commands provided above.
+
+    Run node admin.js to create the topic.
+
+    Start one or more consumers:
+
+    bash:
+    node consumer.js group1
+    node consumer.js group2
+    Start the producer:
+    DEV Community
+
+    bash:
+    node producer.js
+    In the producer terminal, input messages in the format:
+
+    bash:
+    tony south
+    tony north

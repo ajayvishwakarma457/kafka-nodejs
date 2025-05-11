@@ -1,0 +1,41 @@
+# Node modules
+node_modules/
+
+# dotenv environment files
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by testing tools
+coverage/
+
+# Output of build tools
+dist/
+build/
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# macOS system files
+.DS_Store
+
+# VSCode settings (if you don't want to share them)
+.vscode/
+
+# Kafka state (if using local logs)
+kafka-logs/
+zookeeper-logs/

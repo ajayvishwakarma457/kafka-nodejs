@@ -1,0 +1,30 @@
+    base:
+    docker run -p 2181:2181 zookeeper
+
+    base:
+    docker run -p 9092:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=192.168.0.104:2181 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://192.168.0.104:9092 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    confluentinc/cp-kafka
+
+
+Setup topics:
+    bash:
+    node user-registration-system/topics.js
+
+Start the Email Service (Consumer):
+  bash:
+  node services/emailService.js
+
+
+Register a User (Producer):
+
+  bash:
+  node services/userService.js
+
+Example input:
+
+  nginx:
+  ajay Mumbai
+  neha Delhi
